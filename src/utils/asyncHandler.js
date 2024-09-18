@@ -1,11 +1,11 @@
 // using promises
-const asynchandler = (fn) => {
-  (req, res, next) => {
+const asyncHandler = (fn) => {
+ return (req, res, next) => {
     Promise.resolve(fn(req, res, next)).catch((err) => next(err));
   };
 };
 
-export { asynchandler };
+export { asyncHandler };
 
 
 
