@@ -52,17 +52,17 @@ const userSchama = new mongoose.Schema(
 );
 
 // mongoose hooks
-userSchama.pre("save", function (next) {
+userSchama.pre("save",async function (next) {
   if (this.isModified("password")) {
-    const salt = bcrypt.genSaltSync(10);
-    this.password = bcrypt.hashSync(this.password, salt);
+    const salt = await bcrypt.genSaltSync(10);
+    this.password = await bcrypt.hashSync(this.password, salt);
   }
   next();
 });
 
 // custom methods
 userSchama.methods.isPasswordCorrect = async function (password) {
-  const checkPassword = await bcrypt.hashSync(password, this.password);
+  const checkPassword = await bcrypt.compare(password, this.password);
   if (checkPassword) {
     return checkPassword;
   }
