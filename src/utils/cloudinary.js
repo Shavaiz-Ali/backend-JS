@@ -1,5 +1,9 @@
 import { v2 as cloudinary } from "cloudinary";
 import fs from "fs";
+import dotenv from "dotenv";
+dotenv.config();
+
+const api_key = process.env.CLOUDINARY_API_KEY;
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -8,20 +12,26 @@ cloudinary.config({
 });
 
 const cloudinaryUpload = async (localFilePath) => {
+  console.log("localFilePath", localFilePath);
   try {
-    if (!localFilePath) return null;
+    if (!localFilePath || typeof localFilePath.path !== 'string') {
+      throw new Error("Invalid file path");
+    }
     //upload file on cloudinary
-    const response = await cloudinary.uploader.upload(localFilePath, {
+    const response = await cloudinary.uploader.upload(localFilePath.path, {
       resource_type: "auto",
     });
 
     //file has been uploaded successfully
-    console.log("file uploaded succesfully cloudinary", response.url);
+    fs.unlinkSync(localFilePath.path);
     return response;
   } catch (error) {
-    fs.unlinkSync(localFilePath); //remove the locally saved temp file as the upload got  failed
+    console.log("error in cloudinary upload", error);
+    if (localFilePath && typeof localFilePath.path === 'string') {
+      fs.unlinkSync(localFilePath.path); //remove the locally saved temp file as the upload got failed
+    }
     return null;
   }
 };
 
-export {cloudinaryUpload}
+export { cloudinaryUpload };
